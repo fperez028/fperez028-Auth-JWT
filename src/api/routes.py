@@ -69,3 +69,12 @@ def login():
         "msg": "Login successful",
         "token": token
     }), 200
+
+@api.route('/private', methods=['GET'])
+def private_route():
+    token = request.headers.get("Authorization")
+    if not token:
+        return jsonify({"msg": "Missing token"}), 401
+
+    # For demo: accept any non-empty token
+    return jsonify({"msg": "You have access to the private route!"}), 200
