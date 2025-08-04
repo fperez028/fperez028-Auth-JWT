@@ -6,6 +6,7 @@ from api.models import db, User
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
+import uuid
 
 api = Blueprint('api', __name__)
 
@@ -48,3 +49,23 @@ def signup():
     db.session.commit()
 
     return jsonify({"msg": "User created successfully"}), 201
+
+@api.route('/token', methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data.get("email")
+    password = data.get("password")
+
+    if not email or not password:
+        return jsonify({"msg": "Email and password required"}), 400
+
+    user = User.query.filter_by(email=email).first()
+    if not user or not check_password_hash(user.password, password):
+        return jsonify({"msg": "Invalid credentials"}), 401
+
+    # Dummy token (replace this later with JWT)
+    token = str(uuid.uuid4())
+    return jsonify({
+        "msg": "Login successful",
+        "token": token
+    }), 200
