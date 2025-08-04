@@ -6,7 +6,7 @@ from api.models import db, User
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
-import uuid
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
 api = Blueprint('api', __name__)
 
@@ -63,18 +63,18 @@ def login():
     if not user or not check_password_hash(user.password, password):
         return jsonify({"msg": "Invalid credentials"}), 401
 
-    # Dummy token (replace this later with JWT)
-    token = str(uuid.uuid4())
+    access_token = create_access_token(identity=user.id)
     return jsonify({
         "msg": "Login successful",
-        "token": token
+        "access_token": access_token
     }), 200
 
 @api.route('/private', methods=['GET'])
+@jwt_required()
 def private_route():
-    token = request.headers.get("Authorization")
-    if not token:
-        return jsonify({"msg": "Missing token"}), 401
-
-    # For demo: accept any non-empty token
-    return jsonify({"msg": "You have access to the private route!"}), 200
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    return jsonify({
+        "msg": "Welcome to the private route!",
+        "user": user.serialize()
+    }), 200
