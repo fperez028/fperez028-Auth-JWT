@@ -50,7 +50,7 @@ def signup():
 
     return jsonify({"msg": "User created successfully"}), 201
 
-@api.route('/token', methods=['POST'])
+@api.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     email = data.get("email")
